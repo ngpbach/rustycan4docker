@@ -111,9 +111,18 @@ impl NetworkManager {
         }
     }
 
-    pub fn endpoint_create(&self, nuid: String, epuid: String) {
+    pub fn endpoint_create(&self, nuid: String, epuid: String, options: String) {
+        // Check for a peer name specified for in the container
+        let attach_peer = match serde_json::from_str::<serde_json::Value>(&options) {
+            Ok(v) => match v["vxcan.peer"].as_str() {
+                Some(u) => u.to_string(),
+                None => String::new(),
+            },
+            Err(_) => String::new(),
+        };
+
         // Create the endpoint
-        let ep = Endpoint::new(epuid);
+        let ep = Endpoint::new(epuid).with_attach_peer(attach_peer);
 
         // Lock the network list
         let mut map = self.network_list.write();
@@ -143,24 +152,15 @@ impl NetworkManager {
         nuid: String,
         epuid: String,
         _sbox: String,
-        options: String,
     ) -> Result<JoinResponse, Error> {
         // Lock the network list
         let mut map = self.network_list.write();
         match map.get_mut(&nuid) {
             Some(n) => {
-                let peer = match serde_json::from_str::<serde_json::Value>(&options) {
-                    Ok(v) => match v["vxcan.peer"].as_str() {
-                        Some(u) => u.to_string(),
-                        None => String::new(),
-                    },
-                    Err(_) => String::new(),
-                };
-
                 let namespace = String::new();
 
                 // Add the endpoint to the network
-                let rsp = n.endpoint_attach(epuid, namespace, peer)?;
+                let rsp = n.endpoint_attach(epuid, namespace)?;
                 Ok(rsp)
             }
             None => Err(Error),

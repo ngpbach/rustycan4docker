@@ -1,4 +1,4 @@
-FROM rust:1.78.0-bookworm as builder
+FROM rust:1.78.0-bookworm AS builder
 COPY . /rustycan4docker
 RUN cargo install --locked --path /rustycan4docker --root /rustycan4docker
 

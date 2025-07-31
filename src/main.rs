@@ -26,7 +26,6 @@
 
 use crate::manager::NetworkManager;
 use serde::{Deserialize, Serialize};
-use std::fs;
 use std::vec::Vec;
 use tokio::net::UnixListener;
 use tokio_stream::wrappers::UnixListenerStream;
@@ -195,8 +194,12 @@ async fn api_endpoint_create(
                     String::new()
                 }
             };
+            let opt = match v["Options"].as_str() {
+                Some(o) => o.to_string(),
+                None => v["Options"].to_string(),
+            };
             if !error {
-                mgr.endpoint_create(nuid, epuid);
+                mgr.endpoint_create(nuid, epuid, opt);
                 "{}"
             } else {
                 status = http::StatusCode::BAD_REQUEST;
@@ -295,12 +298,8 @@ async fn api_network_join(
                     String::new()
                 }
             };
-            let opt = match v["Options"].as_str() {
-                Some(o) => o.to_string(),
-                None => v["Options"].to_string(),
-            };
             if !error {
-                match mgr.endpoint_attach(nuid, epuid, sbox, opt) {
+                match mgr.endpoint_attach(nuid, epuid, sbox) {
                     Ok(joinrsp) => {
                         let rsp = JoinResponse {
                             InterfaceName: joinrsp,

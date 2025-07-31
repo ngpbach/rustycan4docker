@@ -1,16 +1,23 @@
 {
-    "description": "Network driver to construct and manage CAN bus network for docker.", 
-    "documentation": "https://github.com/ngpbach/rustycan4docker",
-    "entrypoint": ["/usr/local/bin/rustycan4docker"],
-    "network": {
-	"type": "host"
-    },
-    "interface" : {
-	"types": ["docker.networkdriver/1.0"],
-	"socket": "rustyvxcan.sock"
-    },
-    "linux": {
-	"capabilities": ["CAP_NET_ADMIN"]
+  "description": "Network driver to construct and manage CAN bus network for docker.",
+  "documentation": "https://github.com/ngpbach/rustycan4docker",
+  "entrypoint": ["/usr/local/bin/rustycan4docker"],
+  "network": {
+    "type": "host"
+  },
+  "interface": {
+    "types": ["docker.networkdriver/1.0"],
+    "socket": "rustyvxcan.sock"
+  },
+  "linux": {
+    "capabilities": ["CAP_NET_ADMIN"]
+  },
+  "mounts": [
+    {
+      "destination": "/var/run/docker.sock",
+      "source": "/var/run/docker.sock",
+      "type": "bind",
+      "options": ["bind"]
     }
-
+  ]
 }

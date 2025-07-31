@@ -112,7 +112,6 @@ impl Network {
         &mut self,
         epuid: String,
         _namespace: String,
-        peer: String,
     ) -> Result<JoinResponse, Error> {
         let map = self.endpoint_list.read();
         match map.get(&epuid) {
@@ -129,10 +128,13 @@ impl Network {
                     }
                 }
 
-                let mut peerifc = &peer;
-                if peer.is_empty() {
-                    peerifc = &self.peer;
-                }
+                // If a peer name was given, use that; otherwise just use the
+                // default vxcan.peer setting at the network level
+                let peerifc = if !ep.attach_peer.is_empty() {
+                    &ep.attach_peer
+                }else {
+                    &self.peer
+                };
 
                 let rsp = JoinResponse {
                     SrcName: ep.peer.clone(),

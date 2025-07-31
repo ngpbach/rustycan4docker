@@ -30,11 +30,23 @@ use truncrate::*;
 pub struct Endpoint {
     pub uid: String,
     pub device: String,
+
+    // Actual name of the peer used to set up cangw rules on the host; generated
+    // based on the interface being created
     pub peer: String,
+
+    // Name of the peer interface within the docker container Defaults to empty,
+    // which will use a name based on the network-level vxcan.peer driver config
+    pub attach_peer: String,
     created: bool,
 }
 
 impl Endpoint {
+    pub fn with_attach_peer(mut self, peer: String) -> Self {
+        self.attach_peer = peer;
+        self
+    }
+
     pub fn new(uid: String) -> Self {
         println!("Creating a new endpoint: {uid}");
         let ifcs = interfaces::Interface::get_all().unwrap();
@@ -78,6 +90,7 @@ impl Endpoint {
             uid: uid,
             device: newifc,
             peer: peerifc,
+            attach_peer: String::new(),
             created: !exists,
         }
     }
